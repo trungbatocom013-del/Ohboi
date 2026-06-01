@@ -1,0 +1,171 @@
+-- Script GUI Hack Roblox (Ví dụ giáo dục)
+-- Tạo bởi: [Ohboi098]
+
+-- Tạo GUI chính
+local ScreenGui = Instance.new("ScreenGui")
+local MainFrame = Instance.new("Frame")
+local TitleLabel = Instance.new("TextLabel")
+local FlyButton = Instance.new("TextButton")
+local ESPButton = Instance.new("TextButton")
+local SpeedButton = Instance.new("TextButton")
+local CloseButton = Instance.new("TextButton")
+
+-- Cấu hình GUI
+ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+ScreenGui.Name = "HackGUI"
+
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+MainFrame.Position = UDim2.new(0.3, 0, 0.3, 0)
+MainFrame.Size = UDim2.new(0, 300, 0, 200)
+MainFrame.Active = true
+MainFrame.Draggable = true
+
+TitleLabel.Parent = MainFrame
+TitleLabel.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+TitleLabel.Size = UDim2.new(1, 0, 0, 30)
+TitleLabel.Text = "Hack GUI - Roblox"
+TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+TitleLabel.Font = Enum.Font.SourceSansBold
+TitleLabel.TextSize = 18
+
+-- Nút Fly
+FlyButton.Parent = MainFrame
+FlyButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+FlyButton.Position = UDim2.new(0.1, 0, 0.25, 0)
+FlyButton.Size = UDim2.new(0, 100, 0, 40)
+FlyButton.Text = "Fly"
+FlyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+FlyButton.Font = Enum.Font.SourceSans
+FlyButton.TextSize = 16
+
+-- Nút ESP
+ESPButton.Parent = MainFrame
+ESPButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+ESPButton.Position = UDim2.new(0.55, 0, 0.25, 0)
+ESPButton.Size = UDim2.new(0, 100, 0, 40)
+ESPButton.Text = "ESP"
+ESPButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ESPButton.Font = Enum.Font.SourceSans
+ESPButton.TextSize = 16
+
+-- Nút Speed
+SpeedButton.Parent = MainFrame
+SpeedButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+SpeedButton.Position = UDim2.new(0.1, 0, 0.6, 0)
+SpeedButton.Size = UDim2.new(0, 100, 0, 40)
+SpeedButton.Text = "Speed"
+SpeedButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+SpeedButton.Font = Enum.Font.SourceSans
+SpeedButton.TextSize = 16
+
+-- Nút Close
+CloseButton.Parent = MainFrame
+CloseButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+CloseButton.Position = UDim2.new(0.55, 0, 0.6, 0)
+CloseButton.Size = UDim2.new(0, 100, 0, 40)
+CloseButton.Text = "Close"
+CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseButton.Font = Enum.Font.SourceSans
+CloseButton.TextSize = 16
+
+-- Chức năng Fly (bay)
+local flying = false
+local bodyVelocity
+
+FlyButton.MouseButton1Click:Connect(function()
+    if flying then
+        if bodyVelocity then
+            bodyVelocity:Destroy()
+        end
+        flying = false
+        FlyButton.Text = "Fly"
+    else
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+        
+        bodyVelocity = Instance.new("BodyVelocity")
+        bodyVelocity.MaxForce = Vector3.new(10000, 10000, 10000)
+        bodyVelocity.Velocity = Vector3.new(0, 50, 0) -- Bay lên
+        bodyVelocity.Parent = humanoidRootPart
+        
+        flying = true
+        FlyButton.Text = "Stop Fly"
+    end
+end)
+
+-- Chức năng ESP (hiển thị người chơi qua tường)
+local espEnabled = false
+local espObjects = {}
+
+ESPButton.MouseButton1Click:Connect(function()
+    if espEnabled then
+        for _, obj in pairs(espObjects) do
+            obj:Destroy()
+        end
+        espObjects = {}
+        espEnabled = false
+        ESPButton.Text = "ESP"
+    else
+        espEnabled = true
+        ESPButton.Text = "Disable ESP"
+        
+        -- Tạo ESP cho mỗi người chơi
+        for _, player in pairs(game.Players:GetPlayers()) do
+            if player ~= game.Players.LocalPlayer then
+                local character = player.Character
+                if character then
+                    local highlight = Instance.new("Highlight")
+                    highlight.FillColor = Color3.fromRGB(255, 0, 0)
+                    highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+                    highlight.FillTransparency = 0.5
+                    highlight.OutlineTransparency = 0.5
+                    highlight.Parent = character
+                    table.insert(espObjects, highlight)
+                end
+            end
+        end
+        
+        -- Theo dõi khi có người chơi mới vào
+        game.Players.PlayerAdded:Connect(function(newPlayer)
+            newPlayer.CharacterAdded:Connect(function(character)
+                if espEnabled then
+                    local highlight = Instance.new("Highlight")
+                    highlight.FillColor = Color3.fromRGB(255, 0, 0)
+                    highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+                    highlight.FillTransparency = 0.5
+                    highlight.OutlineTransparency = 0.5
+                    highlight.Parent = character
+                    table.insert(espObjects, highlight)
+                end
+            end)
+        end)
+    end
+end)
+
+-- Chức năng Speed (tăng tốc độ)
+local speedEnabled = false
+
+SpeedButton.MouseButton1Click:Connect(function()
+    if speedEnabled then
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoid = character:WaitForChild("Humanoid")
+        humanoid.WalkSpeed = 16 -- Tốc độ mặc định
+        speedEnabled = false
+        SpeedButton.Text = "Speed"
+    else
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoid = character:WaitForChild("Humanoid")
+        humanoid.WalkSpeed = 100 -- Tốc độ cao
+        speedEnabled = true
+        SpeedButton.Text = "Disable Speed"
+    end
+end)
+
+-- Nút Close (đóng GUI)
+CloseButton.MouseButton1Click:Connect(function()
+    ScreenGui:Destroy()
+end)
